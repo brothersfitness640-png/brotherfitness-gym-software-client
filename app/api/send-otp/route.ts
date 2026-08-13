@@ -32,8 +32,8 @@ export async function POST(request: Request) {
     const oneSignalApiKey = process.env.ONESIGNAL_REST_API_KEY;
 
     let notificationSent = false;
-    let notificationError = null;
-    let osData = null;
+    let notificationError: any = null;
+    let osData: any = null;
 
     if (oneSignalAppId) {
       const headers: Record<string, string> = {
@@ -42,7 +42,6 @@ export async function POST(request: Request) {
 
       if (oneSignalApiKey) {
         const key = oneSignalApiKey.trim();
-        // OneSignal os_v2_ keys require 'Key <os_v2_...>' authorization header
         if (key.startsWith("os_v2_")) {
           headers["Authorization"] = `Key ${key}`;
         } else {
@@ -50,42 +49,68 @@ export async function POST(request: Request) {
         }
       }
 
-      // Build payload target
-      const payload: Record<string, any> = {
+      // Base notification message payload
+      const basePayload = {
         app_id: oneSignalAppId,
-        target_channel: "push",
         headings: { en: "Brother's Fitness Code" },
         contents: {
-          en: `Your Brother's Fitness login OTP is: ${otp}. Do not share it with anyone.`,
+          en: `Your Brother's Fitness verification code is: ${otp}. Do not share it.`,
         },
       };
 
-      if (subscriptionId) {
-        payload["include_subscription_ids"] = [subscriptionId];
-      } else if (playerId) {
-        payload["include_player_ids"] = [playerId];
-      } else {
-        payload["included_segments"] = ["Subscribed Users", "Total Subscriptions"];
-      }
-
-      try {
-        const osRes = await fetch("https://onesignal.com/api/v1/notifications", {
+      // Helper function to send notification attempt
+      const sendAttempt = async (targetPayload: Record<string, any>) => {
+        const res = await fetch("https://onesignal.com/api/v1/notifications", {
           method: "POST",
           headers,
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...basePayload, ...targetPayload }),
         });
+        const data = await res.json();
+        return { ok: res.ok, data };
+      };
 
-        osData = await osRes.json();
-        console.log("OneSignal API response:", osData);
+      // Attempt 1: Target specific subscription ID if provided
+      if (subscriptionId) {
+        const attempt1 = await sendAttempt({
+          include_subscription_ids: [subscriptionId],
+        });
+        osData = attempt1.data;
+        if (attempt1.ok && !attempt1.data?.errors) {
+          notificationSent = true;
+        }
+      }
 
-        if (osRes.ok && !osData.errors) {
+      // Attempt 2: Target player ID if provided and Attempt 1 didn't succeed
+      if (!notificationSent && playerId) {
+        const attempt2 = await sendAttempt({
+          include_player_ids: [playerId],
+        });
+        osData = attempt2.data;
+        if (attempt2.ok && !attempt2.data?.errors) {
+          notificationSent = true;
+        }
+      }
+
+      // Attempt 3: Fallback to Subscribed Users segment
+      if (!notificationSent) {
+        const attempt3 = await sendAttempt({
+          included_segments: ["Subscribed Users"],
+        });
+        osData = attempt3.data;
+        if (attempt3.ok && !attempt3.data?.errors) {
           notificationSent = true;
         } else {
-          notificationError = osData.errors || osData.message || "OneSignal error";
+          // Attempt 4: Fallback to Total Subscriptions / Active Users
+          const attempt4 = await sendAttempt({
+            included_segments: ["Active Users"],
+          });
+          osData = attempt4.data;
+          if (attempt4.ok && !attempt4.data?.errors) {
+            notificationSent = true;
+          } else {
+            notificationError = attempt4.data?.errors || attempt3.data?.errors || "All subscribers unsubscribed";
+          }
         }
-      } catch (err: any) {
-        console.error("Failed to call OneSignal API:", err);
-        notificationError = err?.message || "Failed to trigger OneSignal API";
       }
     }
 

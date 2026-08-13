@@ -58,45 +58,52 @@ export default function LoginPage() {
     }
   }, []);
 
-  // Helper to ensure push notification permission is granted
-  const ensureNotificationPermission = async (): Promise<string | null> => {
-    if (typeof window === "undefined") return null;
+  // Helper to ensure push notification permission is granted & active
+  const ensureNotificationPermission = async (): Promise<{ subId: string | null; playerId: string | null }> => {
+    if (typeof window === "undefined") return { subId: null, playerId: null };
 
     return new Promise((resolve) => {
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(async (OneSignal: any) => {
         try {
-          // Check current status
-          const currentPermission = OneSignal.Notifications?.permission;
-          const nativePermission = typeof Notification !== "undefined" ? Notification.permission : "default";
+          let isGranted =
+            OneSignal.Notifications?.permission === true ||
+            (typeof Notification !== "undefined" && Notification.permission === "granted");
 
-          if (currentPermission === true || nativePermission === "granted") {
-            setPermissionGranted(true);
-            const subId = OneSignal.User?.PushSubscription?.id || null;
-            resolve(subId);
-            return;
+          if (!isGranted) {
+            if (OneSignal.Notifications?.requestPermission) {
+              isGranted = await OneSignal.Notifications.requestPermission();
+            } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
+              const res = await Notification.requestPermission();
+              isGranted = res === "granted";
+            }
           }
 
-          // Request permission prompt
-          let granted = false;
-          if (OneSignal.Notifications?.requestPermission) {
-            granted = await OneSignal.Notifications.requestPermission();
-          } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
-            const res = await Notification.requestPermission();
-            granted = res === "granted";
-          }
+          setPermissionGranted(isGranted);
 
-          setPermissionGranted(granted);
+          if (isGranted) {
+            // Opt in push subscription
+            if (OneSignal.User?.PushSubscription?.optIn) {
+              try {
+                await OneSignal.User.PushSubscription.optIn();
+              } catch (e) {
+                console.warn("OptIn note:", e);
+              }
+            }
 
-          if (granted) {
+            // Brief wait for OneSignal ID assignment
+            await new Promise((r) => setTimeout(r, 400));
+
             const subId = OneSignal.User?.PushSubscription?.id || null;
-            resolve(subId);
+            const playerId = OneSignal.User?.onesignalId || OneSignal.User?.id || null;
+
+            resolve({ subId, playerId });
           } else {
-            resolve(null);
+            resolve({ subId: null, playerId: null });
           }
         } catch (err) {
           console.error("Error requesting OneSignal permission:", err);
-          resolve(null);
+          resolve({ subId: null, playerId: null });
         }
       });
     });
@@ -123,7 +130,7 @@ export default function LoginPage() {
 
     try {
       // 1. Enforce notification permission before proceeding
-      const subscriptionId = await ensureNotificationPermission();
+      const { subId, playerId } = await ensureNotificationPermission();
 
       if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
         setError(
@@ -142,7 +149,8 @@ export default function LoginPage() {
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
-          subscriptionId,
+          subscriptionId: subId,
+          playerId,
         }),
       });
 
@@ -232,7 +240,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const subscriptionId = await ensureNotificationPermission();
+      const { subId, playerId } = await ensureNotificationPermission();
       if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
         setError("Please allow notification permission to receive the new OTP code.");
         setLoading(false);
@@ -246,7 +254,8 @@ export default function LoginPage() {
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
-          subscriptionId,
+          subscriptionId: subId,
+          playerId,
         }),
       });
       setSuccessMsg(`Resent new OTP notification to +91 ${cleaned}`);

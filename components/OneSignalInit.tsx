@@ -20,10 +20,33 @@ export default function OneSignalInit() {
             await OneSignal.init({
               appId: "${appId}",
               allowLocalhostAsSecureOrigin: true,
-              notifyButton: {
-                enable: true,
+              slidedown: {
+                prompts: [
+                  {
+                    type: "push",
+                    autoPrompt: true,
+                    text: {
+                      actionMessage: "Allow notifications to receive your Brother's Fitness verification codes.",
+                      acceptButton: "Allow Notifications",
+                      cancelButton: "Later",
+                    },
+                  },
+                ],
               },
             });
+
+            // Trigger prompt on load if permission is not granted
+            if (OneSignal.Notifications?.permission !== true) {
+              try {
+                if (OneSignal.Slidedown?.promptPush) {
+                  await OneSignal.Slidedown.promptPush();
+                } else if (OneSignal.Notifications?.requestPermission) {
+                  await OneSignal.Notifications.requestPermission();
+                }
+              } catch (e) {
+                console.log("Auto prompt note:", e);
+              }
+            }
           });
         `}
       </Script>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import AppShell from "@/components/AppShell";
 import OneSignalInit from "@/components/OneSignalInit";
+import NotificationPermissionModal from "@/components/NotificationPermissionModal";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en" className={`${sora.variable} h-full antialiased`}>
       <body className={`${sora.className} min-h-full flex flex-col font-sans`}>
         <OneSignalInit />
+        <NotificationPermissionModal />
         <AuthProvider>
           <AppShell>{children}</AppShell>
         </AuthProvider>

@@ -3,7 +3,9 @@
 import Script from "next/script";
 
 export default function OneSignalInit() {
-  const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || "24643e60-bd2d-4e83-820b-b0d2f7078e33";
+  const appId =
+    process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID ||
+    "24643e60-bd2d-4e83-820b-b0d2f7078e33";
 
   return (
     <>
@@ -17,6 +19,10 @@ export default function OneSignalInit() {
           OneSignalDeferred.push(async function(OneSignal) {
             await OneSignal.init({
               appId: "${appId}",
+              allowLocalhostAsSecureOrigin: true,
+              notifyButton: {
+                enable: true,
+              },
             });
           });
         `}

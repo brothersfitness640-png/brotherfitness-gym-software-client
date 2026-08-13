@@ -33,6 +33,7 @@ export async function POST(request: Request) {
 
     let notificationSent = false;
     let notificationError = null;
+    let osData = null;
 
     if (oneSignalAppId) {
       const headers: Record<string, string> = {
@@ -40,13 +41,20 @@ export async function POST(request: Request) {
       };
 
       if (oneSignalApiKey) {
-        headers["Authorization"] = `Basic ${oneSignalApiKey.trim()}`;
+        const key = oneSignalApiKey.trim();
+        // OneSignal os_v2_ keys require 'Key <os_v2_...>' authorization header
+        if (key.startsWith("os_v2_")) {
+          headers["Authorization"] = `Key ${key}`;
+        } else {
+          headers["Authorization"] = `Basic ${key}`;
+        }
       }
 
       // Build payload target
       const payload: Record<string, any> = {
         app_id: oneSignalAppId,
-        headings: { en: "Brother's Fitness Verification Code" },
+        target_channel: "push",
+        headings: { en: "Brother's Fitness Code" },
         contents: {
           en: `Your Brother's Fitness login OTP is: ${otp}. Do not share it with anyone.`,
         },
@@ -67,14 +75,13 @@ export async function POST(request: Request) {
           body: JSON.stringify(payload),
         });
 
-        const osData = await osRes.json();
+        osData = await osRes.json();
         console.log("OneSignal API response:", osData);
 
         if (osRes.ok && !osData.errors) {
           notificationSent = true;
         } else {
-          notificationError = osData.errors || "OneSignal API returned error";
-          console.warn("OneSignal warning/error:", osData);
+          notificationError = osData.errors || osData.message || "OneSignal error";
         }
       } catch (err: any) {
         console.error("Failed to call OneSignal API:", err);
@@ -88,7 +95,7 @@ export async function POST(request: Request) {
       mobileNumber: cleanedMobile,
       notificationSent,
       notificationError,
-      requiresRestApiKey: !oneSignalApiKey,
+      oneSignalResponse: osData,
     });
   } catch (error: any) {
     console.error("Error sending OTP:", error);

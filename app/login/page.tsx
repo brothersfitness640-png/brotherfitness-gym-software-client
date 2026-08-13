@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
@@ -14,8 +14,15 @@ import {
   AlertCircle,
   Loader2,
   ShieldCheck,
-  Sparkles,
+  BellRing,
 } from "lucide-react";
+
+declare global {
+  interface Window {
+    OneSignalDeferred?: any[];
+    OneSignal?: any;
+  }
+}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -27,19 +34,84 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [demoOtpNotice, setDemoOtpNotice] = useState<string | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+
+  // Check OneSignal permission status on load
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push((OneSignal: any) => {
+        try {
+          const isEnabled =
+            OneSignal.Notifications?.permission === true ||
+            Notification?.permission === "granted";
+          setPermissionGranted(isEnabled);
+
+          // Listen for permission change
+          OneSignal.Notifications?.addEventListener("permissionChange", (granted: boolean) => {
+            setPermissionGranted(granted);
+          });
+        } catch (e) {
+          console.warn("OneSignal check error:", e);
+        }
+      });
+    }
+  }, []);
+
+  // Helper to ensure push notification permission is granted
+  const ensureNotificationPermission = async (): Promise<string | null> => {
+    if (typeof window === "undefined") return null;
+
+    return new Promise((resolve) => {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async (OneSignal: any) => {
+        try {
+          // Check current status
+          const currentPermission = OneSignal.Notifications?.permission;
+          const nativePermission = typeof Notification !== "undefined" ? Notification.permission : "default";
+
+          if (currentPermission === true || nativePermission === "granted") {
+            setPermissionGranted(true);
+            const subId = OneSignal.User?.PushSubscription?.id || null;
+            resolve(subId);
+            return;
+          }
+
+          // Request permission prompt
+          let granted = false;
+          if (OneSignal.Notifications?.requestPermission) {
+            granted = await OneSignal.Notifications.requestPermission();
+          } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
+            const res = await Notification.requestPermission();
+            granted = res === "granted";
+          }
+
+          setPermissionGranted(granted);
+
+          if (granted) {
+            const subId = OneSignal.User?.PushSubscription?.id || null;
+            resolve(subId);
+          } else {
+            resolve(null);
+          }
+        } catch (err) {
+          console.error("Error requesting OneSignal permission:", err);
+          resolve(null);
+        }
+      });
+    });
+  };
 
   // Generate 6-digit OTP
   const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  // Step 1: Send OTP handler
+  // Step 1: Send OTP handler (Enforces push notification permission)
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
-    setDemoOtpNotice(null);
 
     const cleaned = mobileNumber.replace(/\D/g, "");
     if (!cleaned || cleaned.length < 10) {
@@ -50,15 +122,27 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      // 1. Enforce notification permission before proceeding
+      const subscriptionId = await ensureNotificationPermission();
+
+      if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
+        setError(
+          "Push Notification Permission Required! Please click 'Allow' on the notification prompt to receive your OTP code."
+        );
+        setLoading(false);
+        return;
+      }
+
       const generatedOtp = generateOTP();
 
-      // Send to API route which writes to Firestore collection 'otp' (doc ID = mobileNumber) and sends OneSignal notification
+      // 2. Send to API route (Saves to Firestore 'otp' collection and triggers OneSignal Push)
       const response = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
+          subscriptionId,
         }),
       });
 
@@ -68,9 +152,14 @@ export default function LoginPage() {
         throw new Error(data.error || "Failed to send OTP");
       }
 
+      if (data.requiresRestApiKey) {
+        console.warn(
+          "Notice: ONESIGNAL_REST_API_KEY missing in .env.local. Add REST API key to deliver live push notifications."
+        );
+      }
+
       setStep(2);
-      setSuccessMsg(`OTP sent to +91 ${cleaned}`);
-      setDemoOtpNotice(`Verification Code: ${generatedOtp}`);
+      setSuccessMsg(`OTP sent via OneSignal notification to +91 ${cleaned}`);
     } catch (err: any) {
       console.error("Error sending OTP:", err);
       setError(err?.message || "Failed to send OTP. Please try again.");
@@ -124,7 +213,7 @@ export default function LoginPage() {
           login(cleanedMobile);
         }, 400);
       } else {
-        setError("Invalid OTP code. Please check and try again.");
+        setError("Invalid OTP code. Please check your notification and try again.");
       }
     } catch (err: any) {
       console.error("Error verifying OTP:", err);
@@ -143,6 +232,13 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
+      const subscriptionId = await ensureNotificationPermission();
+      if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
+        setError("Please allow notification permission to receive the new OTP code.");
+        setLoading(false);
+        return;
+      }
+
       const generatedOtp = generateOTP();
       await fetch("/api/send-otp", {
         method: "POST",
@@ -150,10 +246,10 @@ export default function LoginPage() {
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
+          subscriptionId,
         }),
       });
-      setSuccessMsg(`Resent new OTP to +91 ${cleaned}`);
-      setDemoOtpNotice(`New Verification Code: ${generatedOtp}`);
+      setSuccessMsg(`Resent new OTP notification to +91 ${cleaned}`);
     } catch (err: any) {
       setError("Failed to resend OTP.");
     } finally {
@@ -167,7 +263,7 @@ export default function LoginPage() {
       <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500" />
 
       <div className="w-full max-w-md space-y-5 my-8">
-        {/* Brand Header matching Logo & App Header style */}
+        {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
           <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-amber-400 bg-black p-1.5 shadow-md shadow-amber-400/20">
             <Image
@@ -191,7 +287,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Login Card Shell (Matching design language) */}
+        {/* Login Card Shell */}
         <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-md shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none space-y-5">
           <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
             <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
@@ -199,10 +295,27 @@ export default function LoginPage() {
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               {step === 1
-                ? "Enter your registered mobile number to receive your OTP"
-                : `Enter the 6-digit code sent to +91 ${mobileNumber}`}
+                ? "Enter your registered mobile number to receive your OTP via push notification"
+                : `Enter the 6-digit code sent via notification to +91 ${mobileNumber}`}
             </p>
           </div>
+
+          {/* Permission Status Banner */}
+          {!permissionGranted && (
+            <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-300">
+              <div className="flex items-center gap-2 font-semibold">
+                <BellRing className="h-4 w-4 text-amber-600 animate-bounce" />
+                <span>Enable Push Notifications to receive OTP</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => ensureNotificationPermission()}
+                className="rounded bg-amber-400 px-2 py-1 text-[11px] font-bold text-black hover:bg-amber-500 transition-colors shadow-xs"
+              >
+                Allow
+              </button>
+            </div>
+          )}
 
           {/* Notifications / Alerts */}
           {error && (
@@ -216,19 +329,6 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 p-2.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>{successMsg}</span>
-            </div>
-          )}
-
-          {/* Push Notification Simulator Box */}
-          {demoOtpNotice && (
-            <div className="flex flex-col gap-1 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-300">
-              <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-400">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>OneSignal Push Notification</span>
-              </div>
-              <p className="font-mono text-xs font-bold tracking-widest text-zinc-900 dark:text-zinc-100 mt-0.5">
-                {demoOtpNotice}
-              </p>
             </div>
           )}
 
@@ -256,7 +356,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Compact h-9 button matching application button sizing */}
               <button
                 type="submit"
                 disabled={loading}
@@ -265,7 +364,7 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Generating OTP...</span>
+                    <span>Checking Permission & OTP...</span>
                   </>
                 ) : (
                   <>
@@ -305,7 +404,7 @@ export default function LoginPage() {
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="123456"
+                    placeholder="Enter code from notification"
                     className="h-9 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-9 pr-3 text-center font-mono text-sm font-bold tracking-widest text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
                     autoFocus
                     required
@@ -313,7 +412,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Compact h-9 button matching application button sizing */}
               <button
                 type="submit"
                 disabled={loading}

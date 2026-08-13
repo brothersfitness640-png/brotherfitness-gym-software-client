@@ -58,55 +58,63 @@ export default function LoginPage() {
     }
   }, []);
 
-  // Helper to ensure push notification permission is granted & active
+  // Helper to ensure push notification permission is granted & active (with 1.5s timeout safety)
   const ensureNotificationPermission = async (): Promise<{ subId: string | null; playerId: string | null }> => {
     if (typeof window === "undefined") return { subId: null, playerId: null };
 
-    return new Promise((resolve) => {
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      window.OneSignalDeferred.push(async (OneSignal: any) => {
-        try {
-          let isGranted =
-            OneSignal.Notifications?.permission === true ||
-            (typeof Notification !== "undefined" && Notification.permission === "granted");
+    const getPermissionPromise = new Promise<{ subId: string | null; playerId: string | null }>((resolve) => {
+      try {
+        const isNativeGranted = typeof Notification !== "undefined" && Notification.permission === "granted";
+        if (isNativeGranted) {
+          setPermissionGranted(true);
+        }
 
-          if (!isGranted) {
-            if (OneSignal.Notifications?.requestPermission) {
-              isGranted = await OneSignal.Notifications.requestPermission();
-            } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
-              const res = await Notification.requestPermission();
-              isGranted = res === "granted";
-            }
-          }
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        window.OneSignalDeferred.push(async (OneSignal: any) => {
+          try {
+            let isGranted =
+              OneSignal?.Notifications?.permission === true ||
+              (typeof Notification !== "undefined" && Notification.permission === "granted");
 
-          setPermissionGranted(isGranted);
-
-          if (isGranted) {
-            // Opt in push subscription
-            if (OneSignal.User?.PushSubscription?.optIn) {
-              try {
-                await OneSignal.User.PushSubscription.optIn();
-              } catch (e) {
-                console.warn("OptIn note:", e);
+            if (!isGranted) {
+              if (OneSignal?.Notifications?.requestPermission) {
+                isGranted = await OneSignal.Notifications.requestPermission();
+              } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
+                const res = await Notification.requestPermission();
+                isGranted = res === "granted";
               }
             }
 
-            // Brief wait for OneSignal ID assignment
-            await new Promise((r) => setTimeout(r, 400));
+            setPermissionGranted(isGranted);
 
-            const subId = OneSignal.User?.PushSubscription?.id || null;
-            const playerId = OneSignal.User?.onesignalId || OneSignal.User?.id || null;
-
-            resolve({ subId, playerId });
-          } else {
+            if (isGranted) {
+              const subId = OneSignal?.User?.PushSubscription?.id || null;
+              const playerId = OneSignal?.User?.onesignalId || OneSignal?.User?.id || null;
+              resolve({ subId, playerId });
+            } else {
+              resolve({ subId: null, playerId: null });
+            }
+          } catch (err) {
+            console.error("OneSignal permission callback error:", err);
             resolve({ subId: null, playerId: null });
           }
-        } catch (err) {
-          console.error("Error requesting OneSignal permission:", err);
-          resolve({ subId: null, playerId: null });
-        }
-      });
+        });
+      } catch (err) {
+        console.error("Error setting up OneSignal check:", err);
+        resolve({ subId: null, playerId: null });
+      }
     });
+
+    // 1.5 second safety timeout to prevent form hanging
+    const timeoutPromise = new Promise<{ subId: string | null; playerId: string | null }>((resolve) => {
+      setTimeout(() => {
+        const isNativeGranted = typeof Notification !== "undefined" && Notification.permission === "granted";
+        if (isNativeGranted) setPermissionGranted(true);
+        resolve({ subId: null, playerId: null });
+      }, 1500);
+    });
+
+    return Promise.race([getPermissionPromise, timeoutPromise]);
   };
 
   // Generate 6-digit OTP

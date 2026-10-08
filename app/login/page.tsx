@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
@@ -14,15 +14,8 @@ import {
   AlertCircle,
   Loader2,
   ShieldCheck,
-  BellRing,
+  Sparkles,
 } from "lucide-react";
-
-declare global {
-  interface Window {
-    OneSignalDeferred?: any[];
-    OneSignal?: any;
-  }
-}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -34,99 +27,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
-
-  // Check OneSignal permission status on load
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      window.OneSignalDeferred.push((OneSignal: any) => {
-        try {
-          const isEnabled =
-            OneSignal.Notifications?.permission === true ||
-            Notification?.permission === "granted";
-          setPermissionGranted(isEnabled);
-
-          // Listen for permission change
-          OneSignal.Notifications?.addEventListener("permissionChange", (granted: boolean) => {
-            setPermissionGranted(granted);
-          });
-        } catch (e) {
-          console.warn("OneSignal check error:", e);
-        }
-      });
-    }
-  }, []);
-
-  // Helper to ensure push notification permission is granted & active (with 1.5s timeout safety)
-  const ensureNotificationPermission = async (): Promise<{ subId: string | null; playerId: string | null }> => {
-    if (typeof window === "undefined") return { subId: null, playerId: null };
-
-    const getPermissionPromise = new Promise<{ subId: string | null; playerId: string | null }>((resolve) => {
-      try {
-        const isNativeGranted = typeof Notification !== "undefined" && Notification.permission === "granted";
-        if (isNativeGranted) {
-          setPermissionGranted(true);
-        }
-
-        window.OneSignalDeferred = window.OneSignalDeferred || [];
-        window.OneSignalDeferred.push(async (OneSignal: any) => {
-          try {
-            let isGranted =
-              OneSignal?.Notifications?.permission === true ||
-              (typeof Notification !== "undefined" && Notification.permission === "granted");
-
-            if (!isGranted) {
-              if (OneSignal?.Notifications?.requestPermission) {
-                isGranted = await OneSignal.Notifications.requestPermission();
-              } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
-                const res = await Notification.requestPermission();
-                isGranted = res === "granted";
-              }
-            }
-
-            setPermissionGranted(isGranted);
-
-            if (isGranted) {
-              const subId = OneSignal?.User?.PushSubscription?.id || null;
-              const playerId = OneSignal?.User?.onesignalId || OneSignal?.User?.id || null;
-              resolve({ subId, playerId });
-            } else {
-              resolve({ subId: null, playerId: null });
-            }
-          } catch (err) {
-            console.error("OneSignal permission callback error:", err);
-            resolve({ subId: null, playerId: null });
-          }
-        });
-      } catch (err) {
-        console.error("Error setting up OneSignal check:", err);
-        resolve({ subId: null, playerId: null });
-      }
-    });
-
-    // 1.5 second safety timeout to prevent form hanging
-    const timeoutPromise = new Promise<{ subId: string | null; playerId: string | null }>((resolve) => {
-      setTimeout(() => {
-        const isNativeGranted = typeof Notification !== "undefined" && Notification.permission === "granted";
-        if (isNativeGranted) setPermissionGranted(true);
-        resolve({ subId: null, playerId: null });
-      }, 1500);
-    });
-
-    return Promise.race([getPermissionPromise, timeoutPromise]);
-  };
+  const [demoOtpNotice, setDemoOtpNotice] = useState<string | null>(null);
 
   // Generate 6-digit OTP
   const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  // Step 1: Send OTP handler (Enforces push notification permission)
+  // Step 1: Send OTP handler
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
+    setDemoOtpNotice(null);
 
     const cleaned = mobileNumber.replace(/\D/g, "");
     if (!cleaned || cleaned.length < 10) {
@@ -137,28 +50,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // 1. Enforce notification permission before proceeding
-      const { subId, playerId } = await ensureNotificationPermission();
-
-      if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
-        setError(
-          "Push Notification Permission Required! Please click 'Allow' on the notification prompt to receive your OTP code."
-        );
-        setLoading(false);
-        return;
-      }
-
       const generatedOtp = generateOTP();
 
-      // 2. Send to API route (Saves to Firestore 'otp' collection and triggers OneSignal Push)
+      // Send to API route (Saves to Firestore 'otp' collection)
       const response = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
-          subscriptionId: subId,
-          playerId,
         }),
       });
 
@@ -168,14 +68,9 @@ export default function LoginPage() {
         throw new Error(data.error || "Failed to send OTP");
       }
 
-      if (data.requiresRestApiKey) {
-        console.warn(
-          "Notice: ONESIGNAL_REST_API_KEY missing in .env.local. Add REST API key to deliver live push notifications."
-        );
-      }
-
       setStep(2);
-      setSuccessMsg(`OTP sent via OneSignal notification to +91 ${cleaned}`);
+      setSuccessMsg(`OTP sent to +91 ${cleaned}`);
+      setDemoOtpNotice(`Verification Code: ${generatedOtp}`);
     } catch (err: any) {
       console.error("Error sending OTP:", err);
       setError(err?.message || "Failed to send OTP. Please try again.");
@@ -229,7 +124,7 @@ export default function LoginPage() {
           login(cleanedMobile);
         }, 400);
       } else {
-        setError("Invalid OTP code. Please check your notification and try again.");
+        setError("Invalid OTP code. Please check and try again.");
       }
     } catch (err: any) {
       console.error("Error verifying OTP:", err);
@@ -248,25 +143,23 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const { subId, playerId } = await ensureNotificationPermission();
-      if (typeof Notification !== "undefined" && Notification.permission !== "granted") {
-        setError("Please allow notification permission to receive the new OTP code.");
-        setLoading(false);
-        return;
-      }
-
       const generatedOtp = generateOTP();
-      await fetch("/api/send-otp", {
+      const response = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mobileNumber: cleaned,
           otp: generatedOtp,
-          subscriptionId: subId,
-          playerId,
         }),
       });
-      setSuccessMsg(`Resent new OTP notification to +91 ${cleaned}`);
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to resend OTP");
+      }
+
+      setDemoOtpNotice(`Verification Code: ${generatedOtp}`);
+      setSuccessMsg(`Resent new OTP to +91 ${cleaned}`);
     } catch (err: any) {
       setError("Failed to resend OTP.");
     } finally {
@@ -294,7 +187,7 @@ export default function LoginPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-              BROTHER'S FITNESS
+              BROTHER&apos;S FITNESS
             </h1>
             <div className="flex items-center justify-center gap-1.5 mt-0.5">
               <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-400/30">
@@ -312,27 +205,10 @@ export default function LoginPage() {
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               {step === 1
-                ? "Enter your registered mobile number to receive your OTP via push notification"
-                : `Enter the 6-digit code sent via notification to +91 ${mobileNumber}`}
+                ? "Enter your registered mobile number to receive your OTP"
+                : `Enter the 6-digit code sent to +91 ${mobileNumber}`}
             </p>
           </div>
-
-          {/* Permission Status Banner */}
-          {!permissionGranted && (
-            <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-300">
-              <div className="flex items-center gap-2 font-semibold">
-                <BellRing className="h-4 w-4 text-amber-600 animate-bounce" />
-                <span>Enable Push Notifications to receive OTP</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => ensureNotificationPermission()}
-                className="rounded bg-amber-400 px-2 py-1 text-[11px] font-bold text-black hover:bg-amber-500 transition-colors shadow-xs"
-              >
-                Allow
-              </button>
-            </div>
-          )}
 
           {/* Notifications / Alerts */}
           {error && (
@@ -346,6 +222,19 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 p-2.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:border-emerald-900 dark:text-emerald-300">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
               <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* OTP Code Notice Box */}
+          {demoOtpNotice && (
+            <div className="flex flex-col gap-1 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 dark:bg-amber-950/30 dark:border-amber-800 dark:text-amber-300">
+              <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-400">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Verification Code</span>
+              </div>
+              <p className="font-mono text-xs font-bold tracking-widest text-zinc-900 dark:text-zinc-100 mt-0.5">
+                {demoOtpNotice}
+              </p>
             </div>
           )}
 
@@ -381,7 +270,7 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Checking Permission & OTP...</span>
+                    <span>Generating OTP...</span>
                   </>
                 ) : (
                   <>
@@ -421,7 +310,7 @@ export default function LoginPage() {
                     maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    placeholder="Enter code from notification"
+                    placeholder="123456"
                     className="h-9 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-9 pr-3 text-center font-mono text-sm font-bold tracking-widest text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
                     autoFocus
                     required
@@ -464,7 +353,7 @@ export default function LoginPage() {
 
         {/* Footer info */}
         <p className="text-center text-[11px] font-medium text-zinc-400 dark:text-zinc-500">
-          Brother's Fitness Management System
+          Brother&apos;s Fitness Management System
         </p>
       </div>
     </div>

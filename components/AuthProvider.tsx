@@ -3,29 +3,58 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ShieldAlert, Loader2 } from "lucide-react";
+import { encryptSession, decryptSession } from "@/lib/crypto";
+import { db } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+
+export interface LinkedClientProfile {
+  id: string;
+  name: string;
+  mobile: string;
+  outletId: string;
+  outletName: string;
+  photoUrl?: string;
+  planName?: string;
+  planEndDate?: string;
+}
 
 export interface ClientUser {
+  clientId: string;
+  clientName: string;
   mobileNumber: string;
+  outletId: string;
+  outletName: string;
+  photoUrl?: string;
+  planName?: string;
+  planStartDate?: string;
+  planEndDate?: string;
+  email?: string;
+  address?: string;
   loginTime: number;
+  linkedClients?: LinkedClientProfile[];
 }
 
 interface AuthContextType {
   user: ClientUser | null;
   loading: boolean;
-  login: (mobileNumber: string) => void;
+  login: (userData: ClientUser) => Promise<void>;
+  switchProfile: (targetClientId: string) => Promise<void>;
   logout: () => void;
+  updateUserLocally: (data: Partial<ClientUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  login: () => {},
+  login: async () => {},
+  switchProfile: async () => {},
   logout: () => {},
+  updateUserLocally: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
 
-const SESSION_KEY = "bf_client_session";
+const VAULT_SESSION_KEY = "bf_client_vault";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
@@ -33,21 +62,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Restore encrypted session on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(SESSION_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed.mobileNumber) {
-          setUser(parsed);
+    async function restoreSession() {
+      try {
+        const storedToken = localStorage.getItem(VAULT_SESSION_KEY);
+        if (storedToken) {
+          const decrypted = await decryptSession(storedToken);
+          if (decrypted && decrypted.clientId && decrypted.mobileNumber) {
+            setUser(decrypted);
+          } else {
+            // Tampered or invalid session
+            localStorage.removeItem(VAULT_SESSION_KEY);
+          }
         }
+      } catch (err) {
+        console.error("Failed to restore encrypted session:", err);
+        localStorage.removeItem(VAULT_SESSION_KEY);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to restore session:", err);
-    } finally {
-      setLoading(false);
     }
+
+    restoreSession();
   }, []);
+
+  // Realtime synchronization with client's Firestore document
+  useEffect(() => {
+    if (!user?.clientId) return;
+
+    const unsub = onSnapshot(
+      doc(db, "clients", user.clientId),
+      (snapshot) => {
+        if (snapshot.exists()) {
+          const docData = snapshot.data();
+          setUser((prev) => {
+            if (!prev) return null;
+            const updated: ClientUser = {
+              ...prev,
+              clientName: docData.name || prev.clientName,
+              photoUrl: docData.photoUrl || prev.photoUrl,
+              outletName: docData.outletName || prev.outletName,
+              outletId: docData.outletId || prev.outletId,
+              planName: docData.planName || prev.planName,
+              planStartDate: docData.planStartDate || prev.planStartDate,
+              planEndDate: docData.planEndDate || prev.planEndDate,
+              address: docData.address || prev.address,
+              email: docData.email || prev.email,
+            };
+
+            // Update encrypted session storage
+            encryptSession(updated).then((enc) => {
+              try {
+                localStorage.setItem(VAULT_SESSION_KEY, enc);
+              } catch {}
+            });
+
+            return updated;
+          });
+        }
+      },
+      (err) => {
+        console.warn("Client doc listener sync:", err);
+      }
+    );
+
+    return () => unsub();
+  }, [user?.clientId]);
 
   // Strict Security Route Guard
   useEffect(() => {
@@ -56,28 +137,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!user && !isLoginPage) {
         router.replace("/login");
       } else if (user && isLoginPage) {
-        router.replace("/");
+        router.replace("/scan");
       }
     }
   }, [user, loading, pathname, router]);
 
-  const login = (mobileNumber: string) => {
-    const sessionData: ClientUser = {
-      mobileNumber,
+  const login = async (userData: ClientUser) => {
+    const encrypted = await encryptSession(userData);
+    localStorage.setItem(VAULT_SESSION_KEY, encrypted);
+    setUser(userData);
+    router.replace("/scan");
+  };
+
+  const switchProfile = async (targetClientId: string) => {
+    if (!user || !user.linkedClients) return;
+    const target = user.linkedClients.find((c) => c.id === targetClientId);
+    if (!target) return;
+
+    const newSession: ClientUser = {
+      ...user,
+      clientId: target.id,
+      clientName: target.name,
+      outletId: target.outletId,
+      outletName: target.outletName,
+      photoUrl: target.photoUrl,
+      planName: target.planName,
+      planEndDate: target.planEndDate,
       loginTime: Date.now(),
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-    setUser(sessionData);
-    router.replace("/");
+
+    const encrypted = await encryptSession(newSession);
+    localStorage.setItem(VAULT_SESSION_KEY, encrypted);
+    setUser(newSession);
+    router.replace("/scan");
+  };
+
+  const updateUserLocally = (data: Partial<ClientUser>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...data };
+      encryptSession(updated).then((enc) => {
+        try {
+          localStorage.setItem(VAULT_SESSION_KEY, enc);
+        } catch {}
+      });
+      return updated;
+    });
   };
 
   const logout = () => {
-    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(VAULT_SESSION_KEY);
     setUser(null);
     router.replace("/login");
   };
 
-  // Loading spinner during auth initialization
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-white font-sans">
@@ -86,14 +199,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
           <span className="text-xs font-bold text-amber-400 tracking-wide mt-2">
-            Verifying Authentication...
+            Verifying Encrypted Session...
           </span>
         </div>
       </div>
     );
   }
 
-  // Strict blocking: If unauthenticated and trying to access any route other than /login, DO NOT render children!
   if (!user && pathname !== "/login") {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-white p-4 font-sans text-center">
@@ -103,15 +215,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-1">
-              Access Restricted
+              Secure Access Required
             </h2>
             <p className="text-xs text-zinc-400">
-              Authentication required. Redirecting to login page...
+              Please login with your Mobile Number and MPIN.
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs text-amber-400 font-semibold mt-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Redirecting...</span>
+            <span>Redirecting to Login...</span>
           </div>
         </div>
       </div>
@@ -119,7 +231,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        switchProfile,
+        logout,
+        updateUserLocally,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

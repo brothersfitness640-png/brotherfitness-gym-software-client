@@ -113,13 +113,13 @@ export default function PlanPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-black shadow-md shadow-amber-400/20 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-black shadow-md shadow-amber-400/20 font-medium">
             <CreditCard className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <h1 className="text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <span>Membership Plan</span>
-              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-400/30">
+              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 border border-amber-400/30">
                 Active Tier
               </span>
             </h1>
@@ -131,7 +131,7 @@ export default function PlanPage() {
 
         <Link
           href="/scan"
-          className="flex h-9 items-center gap-2 rounded-xl bg-amber-400 px-4 text-xs font-bold text-black shadow-xs hover:bg-amber-500 transition-colors w-fit"
+          className="flex h-9 items-center gap-2 rounded-lg bg-amber-400 px-4 text-xs font-medium text-black shadow-xs hover:bg-amber-500 transition-colors w-fit"
         >
           <Zap className="h-4 w-4" />
           <span>Quick Scan Check-in</span>
@@ -139,21 +139,21 @@ export default function PlanPage() {
       </div>
 
       {/* CURRENT ACTIVE PLAN HERO CARD */}
-      <div className="relative overflow-hidden rounded-3xl border border-amber-400/40 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-6 sm:p-8 shadow-xl space-y-6">
+      <div className="relative overflow-hidden rounded-lg border border-amber-400/40 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black text-white p-6 sm:p-8 shadow-xl space-y-6">
         {/* Ambient Glow */}
         <div className="absolute top-0 right-0 -mr-16 -mt-16 h-64 w-64 rounded-full bg-amber-400/10 blur-3xl pointer-events-none" />
 
         {/* Top Header Tag */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 text-black font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-black font-medium">
               <Dumbbell className="h-4 w-4" />
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400 block">
+              <span className="text-[10px] font-medium uppercase tracking-widest text-amber-400 block">
                 CURRENT ACTIVE PLAN
               </span>
-              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              <h2 className="text-xl sm:text-2xl font-medium tracking-tight text-white">
                 {activePlanTitle}
               </h2>
             </div>
@@ -161,12 +161,12 @@ export default function PlanPage() {
 
           <div className="flex items-center gap-2">
             {!isExpired ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-bold text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-xs font-medium text-emerald-400">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                 Active Membership
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 px-3 py-1 text-xs font-bold text-rose-400">
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500/20 border border-rose-500/40 px-3 py-1 text-xs font-medium text-rose-400">
                 <AlertCircle className="h-3.5 w-3.5" />
                 Plan Expired
               </span>
@@ -176,31 +176,31 @@ export default function PlanPage() {
 
         {/* Plan Validity & Days Remaining */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+          <div className="rounded-lg bg-white/5 border border-white/10 p-4">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 block mb-1">
               Start Date
             </span>
-            <span className="text-sm font-bold text-white flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5 text-amber-400" />
               {planStart || "Registration Date"}
             </span>
           </div>
 
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block mb-1">
+          <div className="rounded-lg bg-white/5 border border-white/10 p-4">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 block mb-1">
               Valid Till
             </span>
-            <span className="text-sm font-bold text-white flex items-center gap-1.5">
+            <span className="text-sm font-medium text-white flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-amber-400" />
               {planEnd || "Ongoing"}
             </span>
           </div>
 
-          <div className="rounded-2xl bg-amber-400/10 border border-amber-400/20 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+          <div className="rounded-lg bg-amber-400/10 border border-amber-400/20 p-4">
+            <span className="text-[10px] font-medium uppercase tracking-wider text-amber-400 block mb-1">
               Days Remaining
             </span>
-            <span className="text-xl font-black text-amber-400">
+            <span className="text-xl font-medium text-amber-400">
               {!isExpired ? `${daysRemaining} Days` : "Renew Needed"}
             </span>
           </div>
@@ -211,7 +211,7 @@ export default function PlanPage() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] font-medium text-zinc-400">
               <span>Membership Period Progress</span>
-              <span className="font-bold text-amber-400">{progressPercent}% elapsed</span>
+              <span className="font-medium text-amber-400">{progressPercent}% elapsed</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
               <div
@@ -241,7 +241,7 @@ export default function PlanPage() {
           <div className="flex items-center gap-2">
             <History className="h-4.5 w-4.5 text-amber-500" />
             <div>
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                 Plan History & Renewals
               </h2>
               <p className="text-[11px] text-zinc-500">
@@ -250,7 +250,7 @@ export default function PlanPage() {
             </div>
           </div>
 
-          <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          <span className="rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
             {historyPlans.length} Records
           </span>
         </div>
@@ -260,9 +260,9 @@ export default function PlanPage() {
             Loading plan history...
           </div>
         ) : historyPlans.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-800">
+          <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center dark:border-zinc-800">
             <Layers className="h-8 w-8 text-zinc-400 mx-auto mb-2" />
-            <h3 className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+            <h3 className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
               No Previous Plans Recorded
             </h3>
             <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -278,7 +278,7 @@ export default function PlanPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-2xl border p-4 transition-all ${
+                  className={`rounded-lg border p-4 transition-all ${
                     isRecent
                       ? "border-amber-400/50 bg-amber-50/20 dark:border-amber-400/30 dark:bg-amber-950/10 shadow-xs"
                       : "border-zinc-200 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-800/30"
@@ -287,7 +287,7 @@ export default function PlanPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-start gap-3">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold text-xs ${
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-medium text-xs ${
                           isRecent
                             ? "bg-amber-400 text-black shadow-xs"
                             : "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
@@ -298,20 +298,20 @@ export default function PlanPage() {
 
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                          <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                             {plan.planName}
                           </h3>
                           {isRecent && (
-                            <span className="rounded bg-amber-400/30 px-2 py-0.5 text-[9px] font-extrabold uppercase text-amber-900 dark:text-amber-300 border border-amber-400/40">
+                            <span className="rounded bg-amber-400/30 px-2 py-0.5 text-[9px] font-medium uppercase text-amber-900 dark:text-amber-300 border border-amber-400/40">
                               Latest Plan
                             </span>
                           )}
                           {!isPlanPast ? (
-                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            <span className="rounded-lg bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                               Active
                             </span>
                           ) : (
-                            <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-bold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                            <span className="rounded-lg bg-zinc-200 px-2 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                               Completed
                             </span>
                           )}
@@ -323,7 +323,7 @@ export default function PlanPage() {
                             {plan.startDate} {plan.endDate ? `to ${plan.endDate}` : ""}
                           </span>
                           {plan.durationMonths && (
-                            <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+                            <span className="font-medium text-zinc-700 dark:text-zinc-300">
                               • {plan.durationMonths} Month{plan.durationMonths > 1 ? "s" : ""}
                             </span>
                           )}
@@ -333,10 +333,10 @@ export default function PlanPage() {
 
                     {plan.totalAmount !== undefined && plan.totalAmount > 0 && (
                       <div className="text-left sm:text-right">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 block">
                           Amount
                         </span>
-                        <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                        <span className="text-base font-medium text-zinc-900 dark:text-zinc-100">
                           ₹{plan.totalAmount.toLocaleString("en-IN")}
                         </span>
                       </div>

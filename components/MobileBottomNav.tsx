@@ -27,9 +27,9 @@ export default function MobileBottomNav() {
           <Link
             key={item.name}
             href={item.href}
-            className={`flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-1.5 transition-colors ${
+            className={`flex flex-col items-center justify-center gap-1 rounded-lg px-3 py-1.5 transition-colors ${
               isActive
-                ? "text-amber-600 font-bold dark:text-amber-400"
+                ? "text-amber-600 font-medium dark:text-amber-400"
                 : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
             }`}
           >
@@ -42,7 +42,7 @@ export default function MobileBottomNav() {
             >
               <Icon className="h-4 w-4" />
             </div>
-            <span className="text-[10px] font-semibold">{item.name}</span>
+            <span className="text-[10px] font-medium">{item.name}</span>
           </Link>
         );
       })}

@@ -15,12 +15,38 @@
   --color-foreground: var(--foreground);
   --color-logo-gold: var(--logo-gold);
   --font-sans: var(--font-sora), system-ui, sans-serif;
+
+  /* Cap border-radius at maximum 8px */
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --radius-4xl: 8px;
+
+  /* Cap font-weight at maximum 500 */
+  --font-weight-semibold: 500;
+  --font-weight-bold: 500;
+  --font-weight-extrabold: 500;
+  --font-weight-black: 500;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sora), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 500;
+}
+
+/* Ensure maximum font-weight is 500 across all typography elements */
+h1, h2, h3, h4, h5, h6, b, strong, th {
+  font-weight: 500 !important;
+}
+
+/* Ensure buttons and inputs have maximum height of 36px */
+button:not(.btn-card):not([data-card="true"]):not(.h-auto),
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+select {
+  max-height: 36px !important;
 }
 
 /* Ensure cursor pointer on interactive elements */

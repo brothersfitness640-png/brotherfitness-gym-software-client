@@ -195,10 +195,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-white font-sans">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-400 text-black font-bold shadow-lg shadow-amber-400/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-400 text-black font-medium shadow-lg shadow-amber-400/20">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
-          <span className="text-xs font-bold text-amber-400 tracking-wide mt-2">
+          <span className="text-xs font-medium text-amber-400 tracking-wide mt-2">
             Verifying Encrypted Session...
           </span>
         </div>
@@ -210,18 +210,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950 text-white p-4 font-sans text-center">
         <div className="flex flex-col items-center gap-4 max-w-sm">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500">
+          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500">
             <ShieldAlert className="h-7 w-7" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white mb-1">
+            <h2 className="text-lg font-medium text-white mb-1">
               Secure Access Required
             </h2>
             <p className="text-xs text-zinc-400">
               Please login with your Mobile Number and MPIN.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-amber-400 font-semibold mt-2">
+          <div className="flex items-center gap-2 text-xs text-amber-400 font-medium mt-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Redirecting to Login...</span>
           </div>

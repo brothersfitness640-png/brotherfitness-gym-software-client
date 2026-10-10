@@ -223,7 +223,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-5 my-8">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-amber-400 bg-black p-1.5 shadow-md shadow-amber-400/20">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-lg border-2 border-amber-400 bg-black p-1.5 shadow-md shadow-amber-400/20">
             <Image
               src="/logo.png"
               alt="Brother's Fitness Logo"
@@ -234,14 +234,14 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            <h1 className="text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
               BROTHER&apos;S FITNESS
             </h1>
             <div className="flex items-center justify-center gap-1.5 mt-0.5">
-              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-400/30">
+              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 border border-amber-400/30">
                 Member Portal
               </span>
-              <span className="flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 <Lock className="h-2.5 w-2.5" />
                 256-Bit Encrypted
               </span>
@@ -251,17 +251,17 @@ export default function LoginPage() {
 
         {/* ONBOARDING: MULTI-CLIENT SELECTION VIEW */}
         {multiClients && multiClients.length > 1 ? (
-          <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-md shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="rounded-lg border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-md shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
                   <User className="h-4 w-4 text-amber-500" />
                   Select Member Account
                 </h2>
                 <button
                   type="button"
                   onClick={() => setMultiClients(null)}
-                  className="text-[11px] font-semibold text-amber-600 hover:underline cursor-pointer"
+                  className="text-[11px] font-medium text-amber-600 hover:underline cursor-pointer"
                 >
                   Back
                 </button>
@@ -278,10 +278,10 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => handleSelectClientProfile(c)}
                   disabled={loading}
-                  className="w-full flex items-center justify-between p-3.5 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-amber-500/5 hover:border-amber-400 dark:border-zinc-800 dark:bg-zinc-800/60 dark:hover:border-amber-400/50 transition-all text-left group cursor-pointer"
+                  className="btn-card w-full flex items-center justify-between p-3.5 rounded-lg border border-zinc-200 bg-zinc-50 hover:bg-amber-500/5 hover:border-amber-400 dark:border-zinc-800 dark:bg-zinc-800/60 dark:hover:border-amber-400/50 transition-all text-left group cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden border-2 border-amber-400 bg-amber-400/20 text-amber-800 font-bold text-sm shadow-xs">
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden border-2 border-amber-400 bg-amber-400/20 text-amber-800 font-medium text-sm shadow-xs">
                       {c.photoUrl ? (
                         <img
                           src={c.photoUrl}
@@ -293,7 +293,7 @@ export default function LoginPage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-amber-600 transition-colors">
+                      <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-amber-600 transition-colors">
                         {c.name}
                       </h3>
                       <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -302,7 +302,7 @@ export default function LoginPage() {
                           {c.outletName || "Main Branch"}
                         </span>
                         {c.planName && (
-                          <span className="rounded bg-amber-400/20 px-1.5 py-0.2 text-[10px] font-semibold text-amber-800 dark:text-amber-300">
+                          <span className="rounded bg-amber-400/20 px-1.5 py-0.2 text-[10px] font-medium text-amber-800 dark:text-amber-300">
                             {c.planName}
                           </span>
                         )}
@@ -310,7 +310,7 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform shrink-0">
+                  <div className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform shrink-0">
                     <span>Continue</span>
                     <ChevronRight className="h-4 w-4" />
                   </div>
@@ -324,9 +324,9 @@ export default function LoginPage() {
           </div>
         ) : (
           /* STANDARD LOGIN CARD */
-          <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-md shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none space-y-5">
+          <div className="rounded-lg border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-md shadow-zinc-200/60 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-none space-y-5">
             <div className="border-b border-zinc-100 dark:border-zinc-800 pb-3">
-              <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
                 Member Sign In
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -336,7 +336,7 @@ export default function LoginPage() {
 
             {/* Error Notification */}
             {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs font-semibold text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in">
+              <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-2.5 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -344,7 +344,7 @@ export default function LoginPage() {
 
             {/* Lockout Active Alert */}
             {lockoutSec && lockoutSec > 0 && (
-              <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-300 p-2.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300 animate-pulse">
+              <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-300 p-2.5 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:border-amber-900 dark:text-amber-300 animate-pulse">
                 <Lock className="h-4 w-4 shrink-0 text-amber-600" />
                 <span>Security Lockout: Retry in {lockoutSec}s</span>
               </div>
@@ -354,11 +354,11 @@ export default function LoginPage() {
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               {/* Mobile Number */}
               <div>
-                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
                   Mobile Number
                 </label>
                 <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">
                     <Phone className="h-3.5 w-3.5 text-amber-500" />
                     <span>+91</span>
                   </div>
@@ -369,7 +369,7 @@ export default function LoginPage() {
                     disabled={loading || Boolean(lockoutSec)}
                     onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter 10-digit number"
-                    className="h-9.5 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-16 pr-3 text-xs font-semibold text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 disabled:opacity-50"
+                    className="h-9 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-16 pr-3 text-xs font-medium text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 disabled:opacity-50"
                     required
                     autoFocus
                   />
@@ -379,7 +379,7 @@ export default function LoginPage() {
               {/* MPIN */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
                     Security MPIN (4-6 digits)
                   </label>
                   <span className="text-[10px] font-medium text-zinc-400">
@@ -395,7 +395,7 @@ export default function LoginPage() {
                     disabled={loading || Boolean(lockoutSec)}
                     onChange={(e) => setMpin(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter MPIN"
-                    className="h-9.5 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-9 pr-10 font-mono text-sm font-bold tracking-widest text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 disabled:opacity-50"
+                    className="h-9 w-full rounded-lg border border-zinc-300 bg-zinc-50 pl-9 pr-10 font-mono text-sm font-medium tracking-widest text-zinc-900 placeholder-zinc-400 outline-none transition-colors focus:border-amber-400 focus:bg-white focus:ring-1 focus:ring-amber-400/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 disabled:opacity-50"
                     required
                   />
                   <button
@@ -417,7 +417,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || Boolean(lockoutSec)}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-amber-400 px-4 text-xs font-bold text-black shadow-xs hover:bg-amber-500 transition-colors disabled:opacity-50 cursor-pointer"
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-amber-400 px-4 text-xs font-medium text-black shadow-xs hover:bg-amber-500 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (
                   <>

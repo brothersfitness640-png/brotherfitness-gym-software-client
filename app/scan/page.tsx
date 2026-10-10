@@ -339,13 +339,13 @@ export default function ScanPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-black shadow-md shadow-amber-400/20 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-black shadow-md shadow-amber-400/20 font-medium">
             <QrCode className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <h1 className="text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <span>QR Code Scanner</span>
-              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-400/30">
+              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 border border-amber-400/30">
                 Attendance
               </span>
             </h1>
@@ -356,12 +356,12 @@ export default function ScanPage() {
         </div>
 
         {/* Member Profile Pill */}
-        <div className="flex items-center gap-2 rounded-xl bg-white border border-zinc-200/80 px-3 py-1.5 shadow-xs dark:bg-zinc-900 dark:border-zinc-800">
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-black font-bold text-[10px]">
+        <div className="flex items-center gap-2 rounded-lg bg-white border border-zinc-200/80 px-3 py-1.5 shadow-xs dark:bg-zinc-900 dark:border-zinc-800">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-400 text-black font-medium text-[10px]">
             {user?.clientName?.charAt(0).toUpperCase() || "M"}
           </div>
           <div className="flex flex-col text-left">
-            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
+            <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 leading-tight">
               {user?.clientName}
             </span>
             <span className="text-[10px] text-zinc-500 font-medium">
@@ -372,10 +372,10 @@ export default function ScanPage() {
       </div>
 
       {/* Main Scanner Section */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-5">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
               <span>Camera Viewfinder</span>
             </h2>
@@ -396,7 +396,7 @@ export default function ScanPage() {
             <button
               onClick={toggleFacingMode}
               disabled={!scannerActive}
-              className="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 disabled:opacity-40 transition-colors cursor-pointer"
+              className="flex h-8.5 items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 disabled:opacity-40 transition-colors cursor-pointer"
               title="Switch Front / Back Camera"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -407,21 +407,21 @@ export default function ScanPage() {
 
         {/* Error Alert */}
         {scanError && (
-          <div className="flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in">
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 p-3 text-xs font-medium text-rose-700 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{scanError}</span>
           </div>
         )}
 
         {/* Camera Viewport Canvas */}
-        <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl bg-zinc-950 border-2 border-zinc-300 dark:border-zinc-800 shadow-inner flex flex-col items-center justify-center min-h-[320px]">
+        <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-lg bg-zinc-950 border-2 border-zinc-300 dark:border-zinc-800 shadow-inner flex flex-col items-center justify-center min-h-[320px]">
           {/* HTML5 QR Code Container */}
           <div id="reader" className="w-full h-full" />
 
           {/* Golden Scanning Reticle Overlay (Active when camera is running) */}
           {scannerActive && (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-              <div className="relative h-60 w-60 rounded-2xl border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.3)] flex flex-col justify-between p-2">
+              <div className="relative h-60 w-60 rounded-lg border-2 border-amber-400/80 shadow-[0_0_20px_rgba(245,158,11,0.3)] flex flex-col justify-between p-2">
                 {/* 4 Corner Accents */}
                 <span className="absolute -top-1 -left-1 h-5 w-5 border-t-4 border-l-4 border-amber-400 rounded-tl-lg" />
                 <span className="absolute -top-1 -right-1 h-5 w-5 border-t-4 border-r-4 border-amber-400 rounded-tr-lg" />
@@ -437,11 +437,11 @@ export default function ScanPage() {
           {/* Idle State when Camera is OFF */}
           {!scannerActive && (
             <div className="p-8 text-center flex flex-col items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-500 shadow-inner">
+              <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-500 shadow-inner">
                 <Camera className="h-8 w-8" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white mb-0.5">
+                <h3 className="text-sm font-medium text-white mb-0.5">
                   Camera is Paused
                 </h3>
                 <p className="text-xs text-zinc-400 max-w-xs">
@@ -457,7 +457,7 @@ export default function ScanPage() {
           {!scannerActive ? (
             <button
               onClick={() => startScanner()}
-              className="flex items-center gap-2 rounded-xl bg-amber-400 px-6 py-3 text-xs font-bold text-black shadow-md shadow-amber-400/20 hover:bg-amber-500 transition-all cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
+              className="flex h-9 items-center justify-center gap-2 rounded-lg bg-amber-400 px-5 text-xs font-medium text-black shadow-md shadow-amber-400/20 hover:bg-amber-500 transition-all cursor-pointer transform hover:scale-[1.02] active:scale-[0.98]"
             >
               <Camera className="h-4 w-4" />
               <span>Turn On Camera & Scan</span>
@@ -465,7 +465,7 @@ export default function ScanPage() {
           ) : (
             <button
               onClick={stopScanner}
-              className="flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-2.5 text-xs font-bold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
+              className="flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
             >
               <span>Stop Camera</span>
             </button>
@@ -474,18 +474,18 @@ export default function ScanPage() {
       </div>
 
       {/* TODAY'S ATTENDANCE SUMMARY & SCAN ACTIVITY */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
         <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <History className="h-4.5 w-4.5 text-amber-500" />
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
               Today&apos;s Attendance Activity
             </h2>
           </div>
 
           <Link
             href="/attendance"
-            className="flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline"
+            className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline"
           >
             <span>Full History</span>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -495,17 +495,17 @@ export default function ScanPage() {
         {todayRecord ? (
           <div className="space-y-4">
             {/* Status Card */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-sm font-bold">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm font-medium">
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                    <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                       ATTENDANCE MARKED: PRESENT
                     </span>
-                    <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:text-emerald-300">
+                    <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:text-emerald-300">
                       {todayRecord.scanCount || 1} Scan{todayRecord.scanCount > 1 ? "s" : ""} Today
                     </span>
                   </div>
@@ -518,7 +518,7 @@ export default function ScanPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 sm:text-right">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 sm:text-right">
                 <Building2 className="h-3.5 w-3.5 text-zinc-500" />
                 <span>{todayRecord.outletName || "Main Branch"}</span>
               </div>
@@ -527,21 +527,21 @@ export default function ScanPage() {
             {/* List of Individual Scans for Today */}
             {todayRecord.scans && todayRecord.scans.length > 0 && (
               <div className="space-y-2 pt-1">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-400">
                   Scan Timeline ({todayRecord.scans.length})
                 </h3>
-                <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200/80 dark:divide-zinc-800 dark:border-zinc-800 overflow-hidden">
+                <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200/80 dark:divide-zinc-800 dark:border-zinc-800 overflow-hidden">
                   {todayRecord.scans.map((s, idx) => (
                     <div
                       key={idx}
                       className="flex items-center justify-between p-3 bg-zinc-50/50 hover:bg-zinc-50 dark:bg-zinc-800/30 dark:hover:bg-zinc-800/60 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/20 text-amber-700 font-bold text-xs dark:text-amber-400">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/20 text-amber-700 font-medium text-xs dark:text-amber-400">
                           #{s.scanNumber || idx + 1}
                         </div>
                         <div>
-                          <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
                             Check-in Scan
                           </span>
                           <span className="block text-[11px] text-zinc-500">
@@ -550,7 +550,7 @@ export default function ScanPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                      <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-zinc-800 dark:text-zinc-200">
                         <Clock className="h-3.5 w-3.5 text-amber-500" />
                         <span>{s.time}</span>
                       </div>
@@ -562,9 +562,9 @@ export default function ScanPage() {
           </div>
         ) : (
           /* Unmarked State */
-          <div className="rounded-xl border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-800">
+          <div className="rounded-lg border border-dashed border-zinc-300 p-6 text-center dark:border-zinc-800">
             <Clock className="h-8 w-8 text-zinc-400 mx-auto mb-2" />
-            <h3 className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+            <h3 className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
               Not Checked In Today
             </h3>
             <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -577,16 +577,16 @@ export default function ScanPage() {
       {/* POPUP MODAL: SCAN SUCCESS CELEBRATION */}
       {successData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="w-full max-w-sm rounded-2xl border border-amber-400/40 bg-white p-6 shadow-2xl dark:border-amber-400/30 dark:bg-zinc-900 text-center space-y-4 animate-in zoom-in-95">
-            <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-400 text-black shadow-lg shadow-amber-400/30">
+          <div className="w-full max-w-sm rounded-lg border border-amber-400/40 bg-white p-6 shadow-2xl dark:border-amber-400/30 dark:bg-zinc-900 text-center space-y-4 animate-in zoom-in-95">
+            <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-amber-400 text-black shadow-lg shadow-amber-400/30">
               <Sparkles className="h-8 w-8 animate-spin" />
             </div>
 
             <div>
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
+              <span className="rounded-lg bg-emerald-100 px-3 py-1 text-[11px] font-medium text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
                 ✓ Verified Presence
               </span>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mt-2">
+              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mt-2">
                 Attendance Recorded!
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -594,14 +594,14 @@ export default function ScanPage() {
               </p>
             </div>
 
-            <div className="rounded-xl bg-zinc-50 p-3 border border-zinc-200/80 dark:bg-zinc-800/60 dark:border-zinc-800 text-xs space-y-1.5">
+            <div className="rounded-lg bg-zinc-50 p-3 border border-zinc-200/80 dark:bg-zinc-800/60 dark:border-zinc-800 text-xs space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500 font-medium">Scan Time:</span>
-                <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{successData.time}</span>
+                <span className="font-mono font-medium text-zinc-900 dark:text-zinc-100">{successData.time}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-zinc-500 font-medium">Today&apos;s Scans:</span>
-                <span className="font-bold text-amber-600 dark:text-amber-400">Scan #{successData.scanCount}</span>
+                <span className="font-medium text-amber-600 dark:text-amber-400">Scan #{successData.scanCount}</span>
               </div>
             </div>
 
@@ -609,7 +609,7 @@ export default function ScanPage() {
               <button
                 type="button"
                 onClick={() => setSuccessData(null)}
-                className="w-full rounded-xl bg-amber-400 py-2.5 text-xs font-bold text-black shadow-xs hover:bg-amber-500 transition-colors cursor-pointer"
+                className="flex h-9 w-full items-center justify-center rounded-lg bg-amber-400 px-4 text-xs font-medium text-black shadow-xs hover:bg-amber-500 transition-colors cursor-pointer"
               >
                 Done
               </button>
@@ -619,7 +619,7 @@ export default function ScanPage() {
                   setSuccessData(null);
                   startScanner();
                 }}
-                className="w-full rounded-xl border border-zinc-200 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex h-9 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Scan Another Station
               </button>

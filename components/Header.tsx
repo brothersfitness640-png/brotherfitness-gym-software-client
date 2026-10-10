@@ -24,10 +24,10 @@ export default function Header() {
               priority
             />
           </div>
-          <span className="text-xs font-bold tracking-tight text-amber-400">
+          <span className="text-xs font-medium tracking-tight text-amber-400">
             BROTHER&apos;S FITNESS
           </span>
-          <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-semibold text-amber-300 border border-amber-400/30">
+          <span className="rounded bg-amber-400/20 px-1.5 py-0.5 text-[9px] font-medium text-amber-300 border border-amber-400/30">
             Member
           </span>
         </div>
@@ -40,10 +40,10 @@ export default function Header() {
           <div className="relative">
             <button
               onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-              className="flex items-center gap-2 rounded-lg bg-black/15 hover:bg-black/25 px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer border border-black/10"
+              className="flex items-center gap-2 rounded-lg bg-black/15 hover:bg-black/25 px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer border border-black/10"
               title="Switch Member Profile"
             >
-              <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full overflow-hidden border border-amber-400 bg-black text-amber-400 font-bold text-xs">
+              <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full overflow-hidden border border-amber-400 bg-black text-amber-400 font-medium text-xs">
                 {user.photoUrl ? (
                   <img
                     src={user.photoUrl}
@@ -55,10 +55,10 @@ export default function Header() {
                 )}
               </div>
               <div className="hidden sm:flex flex-col text-left">
-                <span className="text-xs font-bold leading-tight truncate max-w-[120px]">
+                <span className="text-xs font-medium leading-tight truncate max-w-[120px]">
                   {user.clientName}
                 </span>
-                <span className="text-[10px] text-zinc-800 font-semibold flex items-center gap-0.5">
+                <span className="text-[10px] text-zinc-800 font-medium flex items-center gap-0.5">
                   <Users className="h-2.5 w-2.5" />
                   Switch Profile
                 </span>
@@ -73,8 +73,8 @@ export default function Header() {
                   className="fixed inset-0 z-40"
                   onClick={() => setProfileDropdownOpen(false)}
                 />
-                <div className="absolute right-0 top-full mt-1.5 z-50 w-60 rounded-xl border border-zinc-200 bg-white p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900 animate-in fade-in zoom-in-95">
-                  <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
+                <div className="absolute right-0 top-full mt-1.5 z-50 w-60 rounded-lg border border-zinc-200 bg-white p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900 animate-in fade-in zoom-in-95">
+                  <div className="px-2.5 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-400 border-b border-zinc-100 dark:border-zinc-800">
                     Switch Member Account
                   </div>
                   <div className="mt-1 space-y-1">
@@ -89,12 +89,12 @@ export default function Header() {
                           }}
                           className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                             isCurrent
-                              ? "bg-amber-400/20 text-amber-900 font-bold dark:text-amber-300"
+                              ? "bg-amber-400/20 text-amber-900 font-medium dark:text-amber-300"
                               : "hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
                           }`}
                         >
                           <div className="flex items-center gap-2 truncate">
-                            <div className="h-6 w-6 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 shrink-0 flex items-center justify-center font-bold text-[10px] text-zinc-700 dark:text-zinc-300">
+                            <div className="h-6 w-6 rounded-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 shrink-0 flex items-center justify-center font-medium text-[10px] text-zinc-700 dark:text-zinc-300">
                               {c.photoUrl ? (
                                 <img
                                   src={c.photoUrl}
@@ -126,7 +126,7 @@ export default function Header() {
         ) : (
           /* Single Client Account Badge */
           <div className="flex items-center gap-2 rounded-lg bg-black/15 px-2.5 py-1 text-xs">
-            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full overflow-hidden border border-amber-400 bg-black text-amber-400 font-bold text-xs">
+            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full overflow-hidden border border-amber-400 bg-black text-amber-400 font-medium text-xs">
               {user?.photoUrl ? (
                 <img
                   src={user.photoUrl}
@@ -138,10 +138,10 @@ export default function Header() {
               )}
             </div>
             <div className="hidden sm:flex flex-col text-left">
-              <span className="text-xs font-bold leading-tight truncate max-w-[120px]">
+              <span className="text-xs font-medium leading-tight truncate max-w-[120px]">
                 {user?.clientName || "Member Account"}
               </span>
-              <span className="text-[10px] text-zinc-800 font-semibold truncate max-w-[120px]">
+              <span className="text-[10px] text-zinc-800 font-medium truncate max-w-[120px]">
                 {user?.outletName || "Active Member"}
               </span>
             </div>
@@ -151,7 +151,7 @@ export default function Header() {
         {/* Sign Out Button */}
         <button
           onClick={logout}
-          className="flex h-8.5 items-center gap-1.5 rounded-lg bg-black/15 px-2.5 text-xs font-bold text-zinc-950 hover:bg-black/25 transition-colors cursor-pointer border border-black/10"
+          className="flex h-8.5 items-center gap-1.5 rounded-lg bg-black/15 px-2.5 text-xs font-medium text-zinc-950 hover:bg-black/25 transition-colors cursor-pointer border border-black/10"
           title="Sign Out"
         >
           <LogOut className="h-3.5 w-3.5" />

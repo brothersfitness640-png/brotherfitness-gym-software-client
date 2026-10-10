@@ -192,13 +192,13 @@ export default function AttendancePage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-4 dark:border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-400 text-black shadow-md shadow-amber-400/20 font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-black shadow-md shadow-amber-400/20 font-medium">
             <CalendarCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <h1 className="text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
               <span>Attendance Tracker</span>
-              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-400/30">
+              <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 border border-amber-400/30">
                 Monthly Logs
               </span>
             </h1>
@@ -211,7 +211,7 @@ export default function AttendancePage() {
         {/* Quick Action Link to Scan */}
         <Link
           href="/scan"
-          className="flex h-9 items-center gap-2 rounded-xl bg-amber-400 px-4 text-xs font-bold text-black shadow-xs hover:bg-amber-500 transition-colors w-fit"
+          className="flex h-9 items-center gap-2 rounded-lg bg-amber-400 px-4 text-xs font-medium text-black shadow-xs hover:bg-amber-500 transition-colors w-fit"
         >
           <CalendarCheck className="h-4 w-4" />
           <span>Mark Today&apos;s Attendance</span>
@@ -219,16 +219,16 @@ export default function AttendancePage() {
       </div>
 
       {/* Month Selector Bar */}
-      <div className="flex items-center justify-between rounded-2xl border border-zinc-200 bg-white p-3 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-white p-3 sm:p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
         <button
           onClick={handlePrevMonth}
-          className="flex h-8.5 items-center gap-1 rounded-xl border border-zinc-200 px-3 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          className="flex h-8.5 items-center gap-1 rounded-lg border border-zinc-200 px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Previous</span>
         </button>
 
-        <div className="flex items-center gap-2 font-bold text-sm text-zinc-900 dark:text-zinc-100">
+        <div className="flex items-center gap-2 font-medium text-sm text-zinc-900 dark:text-zinc-100">
           <Calendar className="h-4 w-4 text-amber-500" />
           <span>
             {monthName} {selectedYear}
@@ -237,7 +237,7 @@ export default function AttendancePage() {
 
         <button
           onClick={handleNextMonth}
-          className="flex h-8.5 items-center gap-1 rounded-xl border border-zinc-200 px-3 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+          className="flex h-8.5 items-center gap-1 rounded-lg border border-zinc-200 px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="h-4 w-4" />
@@ -247,80 +247,80 @@ export default function AttendancePage() {
       {/* 4 ATTENDANCE METRIC CARDS */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Days Present */}
-        <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20 shadow-xs">
+        <div className="rounded-lg border border-emerald-200/80 bg-emerald-50/50 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+            <span className="text-xs font-medium uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
               Days Present
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-xs">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-xs">
               <CheckCircle2 className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+            <span className="text-2xl font-medium text-emerald-700 dark:text-emerald-400">
               {metrics.presentCount}
             </span>
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
               Days Attended
             </span>
           </div>
         </div>
 
         {/* Card 2: Days Absent */}
-        <div className="rounded-2xl border border-rose-200/80 bg-rose-50/50 p-4 dark:border-rose-900/40 dark:bg-rose-950/20 shadow-xs">
+        <div className="rounded-lg border border-rose-200/80 bg-rose-50/50 p-4 dark:border-rose-900/40 dark:bg-rose-950/20 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300">
+            <span className="text-xs font-medium uppercase tracking-wider text-rose-800 dark:text-rose-300">
               Days Absent
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500 text-white shadow-xs">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500 text-white shadow-xs">
               <XCircle className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-rose-700 dark:text-rose-400">
+            <span className="text-2xl font-medium text-rose-700 dark:text-rose-400">
               {metrics.absentCount}
             </span>
-            <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">
+            <span className="text-xs font-medium text-rose-600 dark:text-rose-400">
               Missed Sessions
             </span>
           </div>
         </div>
 
         {/* Card 3: Consistency Rate */}
-        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20 shadow-xs">
+        <div className="rounded-lg border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+            <span className="text-xs font-medium uppercase tracking-wider text-amber-800 dark:text-amber-300">
               Consistency Rate
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400 text-black shadow-xs font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400 text-black shadow-xs font-medium">
               <TrendingUp className="h-4.5 w-4.5" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-amber-800 dark:text-amber-400">
+            <span className="text-2xl font-medium text-amber-800 dark:text-amber-400">
               {metrics.attendanceRate}%
             </span>
-            <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+            <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
               Gym Discipline
             </span>
           </div>
         </div>
 
         {/* Card 4: Total Scans Logged */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-xs">
+        <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-zinc-500">
               Total Scans
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 shadow-xs">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 shadow-xs">
               <Flame className="h-4.5 w-4.5 text-amber-500" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            <span className="text-2xl font-medium text-zinc-900 dark:text-zinc-100">
               {metrics.totalScansMonth}
             </span>
-            <span className="text-xs font-semibold text-zinc-500">
+            <span className="text-xs font-medium text-zinc-500">
               Check-ins Logged
             </span>
           </div>
@@ -328,10 +328,10 @@ export default function AttendancePage() {
       </div>
 
       {/* MONTHLY CALENDAR GRID VIEW */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-100 pb-3 dark:border-zinc-800">
           <div>
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
               Attendance Calendar Matrix
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -340,7 +340,7 @@ export default function AttendancePage() {
           </div>
 
           {/* Legend Badges */}
-          <div className="flex items-center gap-3 text-[11px] font-semibold flex-wrap">
+          <div className="flex items-center gap-3 text-[11px] font-medium flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
               <span>Present</span>
@@ -361,7 +361,7 @@ export default function AttendancePage() {
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dayName) => (
             <div
               key={dayName}
-              className="py-1 text-center text-[11px] font-bold uppercase tracking-wider text-zinc-400"
+              className="py-1 text-center text-[11px] font-medium uppercase tracking-wider text-zinc-400"
             >
               {dayName}
             </div>
@@ -369,7 +369,7 @@ export default function AttendancePage() {
 
           {/* Empty spacer blocks for first day alignment */}
           {Array.from({ length: new Date(selectedYear, selectedMonth - 1, 1).getDay() }).map((_, idx) => (
-            <div key={`spacer-${idx}`} className="h-14 sm:h-16 rounded-xl bg-transparent" />
+            <div key={`spacer-${idx}`} className="h-14 sm:h-16 rounded-lg bg-transparent" />
           ))}
 
           {/* Month Day Tiles */}
@@ -383,7 +383,7 @@ export default function AttendancePage() {
                     setExpandedDate(isSelected ? null : item.dateIso);
                   }
                 }}
-                className={`relative flex flex-col justify-between h-14 sm:h-16 rounded-xl p-1.5 sm:p-2 border transition-all ${
+                className={`relative flex flex-col justify-between h-14 sm:h-16 rounded-lg p-1.5 sm:p-2 border transition-all ${
                   item.status === "present"
                     ? "bg-emerald-50/80 border-emerald-300 dark:bg-emerald-950/30 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200 cursor-pointer hover:shadow-md"
                     : item.status === "absent"
@@ -394,7 +394,7 @@ export default function AttendancePage() {
                 } ${isSelected ? "ring-2 ring-amber-400" : ""}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold">{item.day}</span>
+                  <span className="text-xs font-medium">{item.day}</span>
                   {item.status === "present" && (
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   )}
@@ -402,11 +402,11 @@ export default function AttendancePage() {
 
                 {item.status === "present" && (
                   <div className="flex flex-col">
-                    <span className="text-[9px] sm:text-[10px] font-bold text-emerald-700 dark:text-emerald-400 truncate">
+                    <span className="text-[9px] sm:text-[10px] font-medium text-emerald-700 dark:text-emerald-400 truncate">
                       {item.record?.inTime?.split(" ")[0]}
                     </span>
                     {item.record?.scanCount && item.record.scanCount > 1 && (
-                      <span className="rounded bg-emerald-500/20 px-1 py-0.2 text-[8px] font-extrabold w-fit">
+                      <span className="rounded bg-emerald-500/20 px-1 py-0.2 text-[8px] font-medium w-fit">
                         {item.record.scanCount}x
                       </span>
                     )}
@@ -414,7 +414,7 @@ export default function AttendancePage() {
                 )}
 
                 {item.status === "absent" && (
-                  <span className="text-[9px] font-bold text-rose-600 dark:text-rose-400">
+                  <span className="text-[9px] font-medium text-rose-600 dark:text-rose-400">
                     Absent
                   </span>
                 )}
@@ -431,10 +431,10 @@ export default function AttendancePage() {
       </div>
 
       {/* DAILY LOG TIMELINE TABLE */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+      <div className="rounded-lg border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-100 pb-3 dark:border-zinc-800">
           <div>
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+            <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
               Detailed Daily Attendance Logs
             </h2>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -443,10 +443,10 @@ export default function AttendancePage() {
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex items-center gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+          <div className="flex items-center gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
             <button
               onClick={() => setStatusFilter("all")}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                 statusFilter === "all"
                   ? "bg-white text-zinc-900 shadow-xs dark:bg-zinc-900 dark:text-zinc-100"
                   : "text-zinc-600 dark:text-zinc-400"
@@ -456,7 +456,7 @@ export default function AttendancePage() {
             </button>
             <button
               onClick={() => setStatusFilter("present")}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                 statusFilter === "present"
                   ? "bg-emerald-500 text-white shadow-xs"
                   : "text-emerald-700 dark:text-emerald-400"
@@ -466,7 +466,7 @@ export default function AttendancePage() {
             </button>
             <button
               onClick={() => setStatusFilter("absent")}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors cursor-pointer ${
+              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                 statusFilter === "absent"
                   ? "bg-rose-500 text-white shadow-xs"
                   : "text-rose-700 dark:text-rose-400"
@@ -491,7 +491,7 @@ export default function AttendancePage() {
               return (
                 <div
                   key={item.dateIso}
-                  className={`rounded-xl border transition-all overflow-hidden ${
+                  className={`rounded-lg border transition-all overflow-hidden ${
                     item.status === "present"
                       ? "border-emerald-200 bg-white dark:border-emerald-950 dark:bg-zinc-900"
                       : "border-zinc-200/70 bg-zinc-50/50 dark:border-zinc-800 dark:bg-zinc-800/30"
@@ -509,7 +509,7 @@ export default function AttendancePage() {
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`flex h-9 w-9 items-center justify-center rounded-xl font-bold text-xs ${
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg font-medium text-xs ${
                           item.status === "present"
                             ? "bg-emerald-500 text-white"
                             : item.status === "absent"
@@ -522,7 +522,7 @@ export default function AttendancePage() {
 
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
                             {item.dateObj.toLocaleDateString("en-IN", {
                               weekday: "short",
                               month: "short",
@@ -531,7 +531,7 @@ export default function AttendancePage() {
                             })}
                           </span>
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            className={`rounded-lg px-2 py-0.5 text-[10px] font-medium ${
                               item.status === "present"
                                 ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                                 : item.status === "absent"
@@ -562,7 +562,7 @@ export default function AttendancePage() {
                     <div className="flex items-center gap-2">
                       {item.status === "present" && (
                         <div className="flex items-center gap-1.5">
-                          <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                          <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-300">
                             {item.record?.scanCount || 1} Scan{item.record?.scanCount && item.record.scanCount > 1 ? "s" : ""}
                           </span>
                           <ChevronRight
@@ -578,7 +578,7 @@ export default function AttendancePage() {
                   {/* Expandable Scan Details */}
                   {isExpanded && item.record?.scans && item.record.scans.length > 0 && (
                     <div className="border-t border-zinc-100 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/40 space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                      <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 block">
                         Detailed Scan Timestamps for {item.dateIso}
                       </span>
                       <div className="space-y-1.5">
@@ -588,14 +588,14 @@ export default function AttendancePage() {
                             className="flex items-center justify-between rounded-lg bg-white p-2 border border-zinc-200/60 dark:bg-zinc-900 dark:border-zinc-800 text-xs"
                           >
                             <div className="flex items-center gap-2">
-                              <span className="rounded bg-amber-400/20 px-1.5 py-0.2 font-mono text-[10px] font-bold text-amber-800">
+                              <span className="rounded bg-amber-400/20 px-1.5 py-0.2 font-mono text-[10px] font-medium text-amber-800">
                                 #{s.scanNumber || sIdx + 1}
                               </span>
-                              <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                              <span className="font-medium text-zinc-800 dark:text-zinc-200">
                                 {s.outletName}
                               </span>
                             </div>
-                            <span className="font-mono font-bold text-zinc-600 dark:text-zinc-300">
+                            <span className="font-mono font-medium text-zinc-600 dark:text-zinc-300">
                               {s.time}
                             </span>
                           </div>

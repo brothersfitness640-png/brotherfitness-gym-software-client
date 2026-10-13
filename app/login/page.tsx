@@ -28,6 +28,7 @@ import {
   recordFailedLogin,
   clearRateLimit,
 } from "@/lib/crypto";
+import InstallPWAButton from "@/components/InstallPWAButton";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -440,6 +441,9 @@ export default function LoginPage() {
             </div>
           </div>
         )}
+
+        {/* Install PWA Button / Banner */}
+        <InstallPWAButton />
 
         {/* Footer info */}
         <p className="text-center text-[11px] font-medium text-zinc-400 dark:text-zinc-500">

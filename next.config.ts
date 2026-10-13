@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/manifest.json",
+        destination: "/manifest.webmanifest",
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -22,6 +30,15 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/manifest.webmanifest",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/manifest+json; charset=utf-8",
+          },
+        ],
+      },
+      {
+        source: "/manifest.json",
         headers: [
           {
             key: "Content-Type",

@@ -1,10 +1,9 @@
 // Brother's Fitness PWA Service Worker
-const CACHE_NAME = 'brothers-fitness-cache-v1';
+const CACHE_NAME = 'brothers-fitness-cache-v2';
 
 const STATIC_ASSETS = [
   '/',
   '/offline.html',
-  '/manifest.json',
   '/manifest.webmanifest',
   '/logo.png',
   '/favicon.ico',
@@ -17,10 +16,14 @@ const STATIC_ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Pre-caching warning:', err);
-      });
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const asset of STATIC_ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (err) {
+          console.warn('[SW] Pre-caching warning for ' + asset, err);
+        }
+      }
     })
   );
   self.skipWaiting();

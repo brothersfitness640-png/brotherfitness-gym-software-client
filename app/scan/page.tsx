@@ -88,6 +88,7 @@ export default function ScanPage() {
   const [scannerActive, setScannerActive] = useState(false);
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   // Scan Processing & Modal State
   const [scanProcessing, setScanProcessing] = useState(false);
@@ -95,6 +96,7 @@ export default function ScanPage() {
     outletName: string;
     time: string;
     scanCount: number;
+    scans: ScanEntry[];
   } | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
@@ -130,25 +132,37 @@ export default function ScanPage() {
     return () => unsub();
   }, [user?.clientId, todayStr]);
 
-  // Start QR Code Scanner
+  // Start QR Code Scanner (Defaults to Back Camera 'environment')
   const startScanner = async (mode: "environment" | "user" = facingMode) => {
     setScanError(null);
     try {
       if (html5QrCodeRef.current) {
         try {
-          await html5QrCodeRef.current.stop();
+          if (html5QrCodeRef.current.isScanning) {
+            await html5QrCodeRef.current.stop();
+          }
+        } catch {}
+        try {
+          html5QrCodeRef.current.clear();
         } catch {}
         html5QrCodeRef.current = null;
       }
 
-      const qrScanner = new Html5Qrcode("reader");
+      const readerElem = document.getElementById("reader");
+      if (!readerElem) return;
+
+      const qrScanner = new Html5Qrcode("reader", { verbose: false });
       html5QrCodeRef.current = qrScanner;
 
       await qrScanner.start(
         { facingMode: mode },
         {
-          fps: 15,
-          qrbox: { width: 260, height: 260 },
+          fps: 20,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.max(200, Math.floor(minEdge * 0.72));
+            return { width: boxSize, height: boxSize };
+          },
           aspectRatio: 1.0,
         },
         onScanSuccess,
@@ -158,6 +172,34 @@ export default function ScanPage() {
       setScannerActive(true);
     } catch (err: any) {
       console.error("Camera scanner start error:", err);
+      // Graceful fallback to any available camera if specific facing mode fails
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (devices && devices.length > 0) {
+          const targetDevice =
+            mode === "environment"
+              ? devices.find((d) => /back|rear|environment/i.test(d.label)) || devices[devices.length - 1]
+              : devices.find((d) => /front|user|selfie/i.test(d.label)) || devices[0];
+
+          const qrScanner = new Html5Qrcode("reader", { verbose: false });
+          html5QrCodeRef.current = qrScanner;
+          await qrScanner.start(
+            targetDevice.id,
+            {
+              fps: 20,
+              qrbox: { width: 250, height: 250 },
+              aspectRatio: 1.0,
+            },
+            onScanSuccess,
+            () => {}
+          );
+          setScannerActive(true);
+          return;
+        }
+      } catch (fbErr) {
+        console.warn("Camera fallback failed:", fbErr);
+      }
+
       setScanError(
         "Camera access permission is required to scan QR codes. Please check browser settings."
       );
@@ -169,31 +211,69 @@ export default function ScanPage() {
   const stopScanner = async () => {
     if (html5QrCodeRef.current) {
       try {
-        await html5QrCodeRef.current.stop();
+        if (html5QrCodeRef.current.isScanning) {
+          await html5QrCodeRef.current.stop();
+        }
+      } catch {}
+      try {
+        html5QrCodeRef.current.clear();
       } catch {}
       html5QrCodeRef.current = null;
     }
     setScannerActive(false);
   };
 
-  // Toggle Camera Facing Mode (Front vs Back)
+  // Toggle Camera Facing Mode (Smooth & Instant Switch with Hardware Lock Release)
   const toggleFacingMode = async () => {
+    if (isSwitching) return;
+    setIsSwitching(true);
     const nextMode = facingMode === "environment" ? "user" : "environment";
     setFacingMode(nextMode);
-    if (scannerActive) {
-      await stopScanner();
-      setTimeout(() => {
-        startScanner(nextMode);
-      }, 200);
+
+    try {
+      if (html5QrCodeRef.current) {
+        if (html5QrCodeRef.current.isScanning) {
+          await html5QrCodeRef.current.stop();
+        }
+        try {
+          html5QrCodeRef.current.clear();
+        } catch {}
+        html5QrCodeRef.current = null;
+      }
+
+      // Micro-wait to allow hardware video tracks to fully terminate
+      await new Promise((resolve) => setTimeout(resolve, 120));
+
+      if (scannerActive) {
+        await startScanner(nextMode);
+      }
+    } catch (err) {
+      console.error("Camera switch error:", err);
+    } finally {
+      setIsSwitching(false);
     }
   };
 
-  // Cleanup scanner on unmount
+  // Auto-start Back Camera on Mount & Clean up on Unmount
   useEffect(() => {
+    let mounted = true;
+    const initTimer = setTimeout(() => {
+      if (mounted) {
+        startScanner("environment");
+      }
+    }, 350);
+
     return () => {
+      mounted = false;
+      clearTimeout(initTimer);
       if (html5QrCodeRef.current) {
         try {
-          html5QrCodeRef.current.stop();
+          if (html5QrCodeRef.current.isScanning) {
+            html5QrCodeRef.current.stop();
+          }
+        } catch {}
+        try {
+          html5QrCodeRef.current.clear();
         } catch {}
       }
     };
@@ -234,6 +314,7 @@ export default function ScanPage() {
 
       let newScanCount = 1;
       let existingScans: ScanEntry[] = [];
+      let finalScans: ScanEntry[] = [];
 
       if (existingSnap.exists()) {
         const existingData = existingSnap.data() as TodayAttendanceDoc;
@@ -261,6 +342,7 @@ export default function ScanPage() {
             scanNumber: newScanCount,
           },
         ];
+        finalScans = updatedScans;
 
         await setDoc(
           clientDocRef,
@@ -293,6 +375,7 @@ export default function ScanPage() {
             scanNumber: 1,
           },
         ];
+        finalScans = initialScans;
 
         await setDoc(clientDocRef, {
           clientId: user!.clientId,
@@ -313,11 +396,12 @@ export default function ScanPage() {
         });
       }
 
-      // Show success modal
+      // Show success modal with all scans
       setSuccessData({
         outletName,
         time: timeStr,
         scanCount: newScanCount,
+        scans: finalScans,
       });
 
       // Pause scanner while popup is open
@@ -395,12 +479,26 @@ export default function ScanPage() {
             </button>
             <button
               onClick={toggleFacingMode}
-              disabled={!scannerActive}
-              className="flex h-8.5 items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 disabled:opacity-40 transition-colors cursor-pointer"
-              title="Switch Front / Back Camera"
+              disabled={!scannerActive || isSwitching}
+              className="flex h-8.5 items-center gap-1.5 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+              title={facingMode === "environment" ? "Switch to Front Camera" : "Switch to Back Camera"}
             >
-              <RefreshCw className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{facingMode === "environment" ? "Back" : "Front"}</span>
+              <RefreshCw className={`h-3.5 w-3.5 ${isSwitching ? "animate-spin text-amber-500" : ""}`} />
+              <span className="inline-flex items-center gap-1">
+                {isSwitching ? (
+                  "Switching..."
+                ) : facingMode === "environment" ? (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Back Cam
+                  </>
+                ) : (
+                  <>
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    Front Cam
+                  </>
+                )}
+              </span>
             </button>
           </div>
         </div>
@@ -525,40 +623,73 @@ export default function ScanPage() {
             </div>
 
             {/* List of Individual Scans for Today */}
-            {todayRecord.scans && todayRecord.scans.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-400">
-                  Scan Timeline ({todayRecord.scans.length})
-                </h3>
-                <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200/80 dark:divide-zinc-800 dark:border-zinc-800 overflow-hidden">
-                  {todayRecord.scans.map((s, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 bg-zinc-50/50 hover:bg-zinc-50 dark:bg-zinc-800/30 dark:hover:bg-zinc-800/60 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/20 text-amber-700 font-medium text-xs dark:text-amber-400">
-                          #{s.scanNumber || idx + 1}
-                        </div>
-                        <div>
-                          <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
-                            Check-in Scan
-                          </span>
-                          <span className="block text-[11px] text-zinc-500">
-                            {s.outletName}
-                          </span>
-                        </div>
-                      </div>
+            {(() => {
+              const displayScans: ScanEntry[] =
+                todayRecord.scans && todayRecord.scans.length > 0
+                  ? todayRecord.scans
+                  : [
+                      ...(todayRecord.inTime
+                        ? [
+                            {
+                              scanNumber: 1,
+                              time: todayRecord.inTime,
+                              outletName: todayRecord.outletName || "Gym Outlet",
+                              timestamp: Date.now(),
+                            },
+                          ]
+                        : []),
+                      ...(todayRecord.outTime && todayRecord.outTime !== todayRecord.inTime
+                        ? [
+                            {
+                              scanNumber: 2,
+                              time: todayRecord.outTime,
+                              outletName: todayRecord.outletName || "Gym Outlet",
+                              timestamp: Date.now(),
+                            },
+                          ]
+                        : []),
+                    ];
 
-                      <div className="flex items-center gap-1.5 font-mono text-xs font-medium text-zinc-800 dark:text-zinc-200">
-                        <Clock className="h-3.5 w-3.5 text-amber-500" />
-                        <span>{s.time}</span>
+              return displayScans.length > 0 ? (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                      Scan Timeline ({displayScans.length} {displayScans.length === 1 ? "Scan" : "Scans"})
+                    </h3>
+                    <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                      Total: {todayRecord.scanCount || displayScans.length} Times Scanned
+                    </span>
+                  </div>
+                  <div className="divide-y divide-zinc-100 rounded-lg border border-zinc-200/80 dark:divide-zinc-800 dark:border-zinc-800 overflow-hidden">
+                    {displayScans.map((s, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 bg-zinc-50/50 hover:bg-zinc-50 dark:bg-zinc-800/30 dark:hover:bg-zinc-800/60 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-400/20 text-amber-700 font-bold text-xs dark:text-amber-400">
+                            #{s.scanNumber || idx + 1}
+                          </div>
+                          <div>
+                            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                              Check-in Scan #{s.scanNumber || idx + 1}
+                            </span>
+                            <span className="block text-[11px] text-zinc-500 font-medium">
+                              {s.outletName}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          <Clock className="h-3.5 w-3.5 text-amber-500" />
+                          <span>{s.time}</span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ) : null;
+            })()}
           </div>
         ) : (
           /* Unmarked State */
@@ -583,10 +714,10 @@ export default function ScanPage() {
             </div>
 
             <div>
-              <span className="rounded-lg bg-emerald-100 px-3 py-1 text-[11px] font-medium text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
+              <span className="rounded-lg bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-800 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
                 ✓ Verified Presence
               </span>
-              <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mt-2">
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mt-2">
                 Attendance Recorded!
               </h2>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
@@ -594,22 +725,49 @@ export default function ScanPage() {
               </p>
             </div>
 
-            <div className="rounded-lg bg-zinc-50 p-3 border border-zinc-200/80 dark:bg-zinc-800/60 dark:border-zinc-800 text-xs space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-zinc-500 font-medium">Scan Time:</span>
-                <span className="font-mono font-medium text-zinc-900 dark:text-zinc-100">{successData.time}</span>
+            <div className="rounded-lg bg-zinc-50 p-3.5 border border-zinc-200/80 dark:bg-zinc-800/60 dark:border-zinc-800 text-xs space-y-2.5 text-left">
+              <div className="flex items-center justify-between pb-1.5 border-b border-zinc-200 dark:border-zinc-700">
+                <span className="text-zinc-500 font-medium">Latest Scan Time:</span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5 text-amber-500" />
+                  {successData.time}
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-zinc-500 font-medium">Today&apos;s Scans:</span>
-                <span className="font-medium text-amber-600 dark:text-amber-400">Scan #{successData.scanCount}</span>
+                <span className="text-zinc-500 font-medium">Today&apos;s Total Scans:</span>
+                <span className="rounded bg-amber-400/20 px-2 py-0.5 font-bold text-amber-800 dark:text-amber-300 border border-amber-400/30">
+                  {successData.scanCount} Times Scanned
+                </span>
               </div>
+
+              {/* All scan times list */}
+              {successData.scans && successData.scans.length > 0 && (
+                <div className="pt-1.5 space-y-1.5">
+                  <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block tracking-wider">
+                    All Scan Timestamps Today ({successData.scans.length}):
+                  </span>
+                  <div className="max-h-36 overflow-y-auto space-y-1 rounded-lg border border-zinc-200/90 bg-white p-2 dark:border-zinc-700/80 dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {successData.scans.map((s, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-xs py-1 first:pt-0 last:pb-0">
+                        <span className="font-medium text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                          <span className="rounded bg-amber-400/20 px-1.5 py-0.2 font-mono text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                            #{s.scanNumber || idx + 1}
+                          </span>
+                          <span className="truncate max-w-[125px]">{s.outletName}</span>
+                        </span>
+                        <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">{s.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-2 pt-1">
               <button
                 type="button"
                 onClick={() => setSuccessData(null)}
-                className="flex h-9 w-full items-center justify-center rounded-lg bg-amber-400 px-4 text-xs font-medium text-black shadow-xs hover:bg-amber-500 transition-colors cursor-pointer"
+                className="flex h-9 w-full items-center justify-center rounded-lg bg-amber-400 px-4 text-xs font-bold text-black shadow-xs hover:bg-amber-500 transition-colors cursor-pointer"
               >
                 Done
               </button>
@@ -617,9 +775,9 @@ export default function ScanPage() {
                 type="button"
                 onClick={() => {
                   setSuccessData(null);
-                  startScanner();
+                  startScanner("environment");
                 }}
-                className="flex h-9 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-xs font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="flex h-9 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 Scan Another Station
               </button>

@@ -562,8 +562,8 @@ export default function AttendancePage() {
                     <div className="flex items-center gap-2">
                       {item.status === "present" && (
                         <div className="flex items-center gap-1.5">
-                          <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-300">
-                            {item.record?.scanCount || 1} Scan{item.record?.scanCount && item.record.scanCount > 1 ? "s" : ""}
+                          <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                            {item.record?.scanCount || (item.record?.scans?.length ?? 1)} Scan{(item.record?.scanCount ?? 1) > 1 ? "s" : ""}
                           </span>
                           <ChevronRight
                             className={`h-4 w-4 text-zinc-400 transition-transform ${
@@ -576,33 +576,67 @@ export default function AttendancePage() {
                   </div>
 
                   {/* Expandable Scan Details */}
-                  {isExpanded && item.record?.scans && item.record.scans.length > 0 && (
-                    <div className="border-t border-zinc-100 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/40 space-y-2">
-                      <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400 block">
-                        Detailed Scan Timestamps for {item.dateIso}
-                      </span>
-                      <div className="space-y-1.5">
-                        {item.record.scans.map((s, sIdx) => (
-                          <div
-                            key={sIdx}
-                            className="flex items-center justify-between rounded-lg bg-white p-2 border border-zinc-200/60 dark:bg-zinc-900 dark:border-zinc-800 text-xs"
-                          >
-                            <div className="flex items-center gap-2">
-                              <span className="rounded bg-amber-400/20 px-1.5 py-0.2 font-mono text-[10px] font-medium text-amber-800">
-                                #{s.scanNumber || sIdx + 1}
-                              </span>
-                              <span className="font-medium text-zinc-800 dark:text-zinc-200">
-                                {s.outletName}
+                  {isExpanded && item.status === "present" && (() => {
+                    const allRecordScans: ScanEntry[] =
+                      item.record?.scans && item.record.scans.length > 0
+                        ? item.record.scans
+                        : [
+                            ...(item.record?.inTime
+                              ? [
+                                  {
+                                    scanNumber: 1,
+                                    time: item.record.inTime,
+                                    outletName: item.record.outletName || "Gym Outlet",
+                                    timestamp: Date.now(),
+                                  },
+                                ]
+                              : []),
+                            ...(item.record?.outTime && item.record.outTime !== item.record.inTime
+                              ? [
+                                  {
+                                    scanNumber: 2,
+                                    time: item.record.outTime,
+                                    outletName: item.record.outletName || "Gym Outlet",
+                                    timestamp: Date.now(),
+                                  },
+                                ]
+                              : []),
+                          ];
+
+                    return allRecordScans.length > 0 ? (
+                      <div className="border-t border-zinc-100 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-800/40 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">
+                            All Scan Timestamps for {item.dateIso}
+                          </span>
+                          <span className="rounded bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                            Total: {item.record?.scanCount || allRecordScans.length} Times Scanned
+                          </span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {allRecordScans.map((s, sIdx) => (
+                            <div
+                              key={sIdx}
+                              className="flex items-center justify-between rounded-lg bg-white p-2.5 border border-zinc-200/60 dark:bg-zinc-900 dark:border-zinc-800 text-xs shadow-xs"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="rounded bg-amber-400/20 px-1.5 py-0.2 font-mono text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                                  #{s.scanNumber || sIdx + 1}
+                                </span>
+                                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                                  {s.outletName}
+                                </span>
+                              </div>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <Clock className="h-3 w-3 text-amber-500" />
+                                {s.time}
                               </span>
                             </div>
-                            <span className="font-mono font-medium text-zinc-600 dark:text-zinc-300">
-                              {s.time}
-                            </span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    ) : null;
+                  })()}
                 </div>
               );
             })}
